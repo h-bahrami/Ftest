@@ -10,7 +10,6 @@ namespace Funda
 {
     class Program
     {
-        private const string BaseUrl = "http://partnerapi.funda.nl";
         private const int PageRequestCount = 100;
 
         private static async Task<dynamic> DownloadData(string path)
@@ -18,7 +17,7 @@ namespace Funda
             try
             {
                 using var client = new HttpClient();
-                client.BaseAddress = new Uri(BaseUrl);
+                client.BaseAddress = new Uri("http://partnerapi.funda.nl");
                 using var response = await client.GetAsync(path);
                 response.EnsureSuccessStatusCode();
 
