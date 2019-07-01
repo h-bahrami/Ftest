@@ -7,11 +7,11 @@ using System.Threading.Tasks;
 
 namespace Funda.Services
 {
-    public class DownloaderService: IDownloaderService
+    public class JsonDownloaderService : IDownloaderService
     {
         private readonly string baseAdress;
 
-        public DownloaderService(string baseAdress)
+        public JsonDownloaderService (string baseAdress)
         {
             this.baseAdress = baseAdress;
         }

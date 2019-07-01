@@ -1,76 +1,27 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Funda.Services;
+using Funda.BL;
 
 namespace Funda
 {
     class Program
-    {
-        private const int PageRequestCount = 100;
+    { 
+        static void Main(string[] args)
+        {
+            // in real scenario the downloader service will be injected by DI
+            var business = new BusinessLogic(new JsonDownloaderService ("http://partnerapi.funda.nl"));
+            business.OnProgressEventHandler += (int page, int totalPages) =>
+            {
+                Console.Title = $"{page}/{totalPages} Downloaded and Processed.";
+            };
 
-        //private static async Task<dynamic> DownloadData(string path)
-        //{
-        //    try
-        //    {
-        //        using var client = new HttpClient();
-        //        client.BaseAddress = new Uri("http://partnerapi.funda.nl");
-        //        using var response = await client.GetAsync(path);
-        //        response.EnsureSuccessStatusCode();
-
-        //        var json = await response.Content.ReadAsStringAsync();
-        //        dynamic parsed = JsonConvert.DeserializeObject(json);
-        //        return parsed;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine(ex.Message);
-        //        return null;
-        //    }
-        //}
-
-        //private static IEnumerable<string> CountMakelaars(string urlPattern, string info)
-        //{
-        //    try
-        //    {
-        //        var downloadTask = DownloadData(string.Format(urlPattern, 1, PageRequestCount));
-        //        downloadTask.Wait();
-        //        var result = downloadTask.Result;
-
-        //        var pages = (int)result["Paging"]["AantalPaginas"].Value;
-        //        var dict = new Dictionary<string, int>();
-
-        //        for (var i = 2; i <= pages; i++)
-        //        {
-        //            Console.Title = $"Processing {info} [Page {i} of {pages}]...";
-        //            foreach (var obj in result["Objects"])
-        //            {
-        //                var makelaarNaam = (string)obj["MakelaarNaam"].Value;
-        //                if (dict.ContainsKey(makelaarNaam))
-        //                    dict[makelaarNaam] += 1;
-        //                else
-        //                    dict.Add(makelaarNaam, 1);
-        //            }
-        //            Thread.Sleep(100);
-        //            downloadTask = DownloadData(string.Format(urlPattern, i, PageRequestCount));
-        //            downloadTask.Wait();
-        //            result = downloadTask.Result;
-        //        }
-
-        //        var sorted = (from entry in dict orderby entry.Value descending select $"{entry.Key} ({entry.Value})").Take(10);
-        //        return sorted;
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"Problem downloading data for {info} [{ex.Message}]");
-        //        return null;
-        //    }
-        //}
+            var topMakelaarsAmsterdam = business.GetTopMakelaars();
+            print(topMakelaarsAmsterdam, "Amsterdam top makelaar");
+            var topMakelaarsAmsterdamTuin = business.GetTopMakelaars(withGarden: true);
+            print(topMakelaarsAmsterdam, "Amsterdam top makelaar (tuin)");
+        }
 
         private static void print(IEnumerable<string> data, string info)
         {
@@ -82,37 +33,6 @@ namespace Funda
                 Console.WriteLine("---------------------------------------------");
             }
         }
-
-        static void Main(string[] args)
-        {
-            // this just to mimic DI, like (e.g .net core web api).
-            //var serviceProvider = new  ServiceCollection()
-            //    .AddSingleton<IDownloaderService, DownloaderService>(impleFaction => new DownloaderService("http://partnerapi.funda.nl"))
-            //    .AddTransient<IBusinessLogic, BusinessLogic>().BuildServiceProvider();
-
-            //var business = serviceProvider.GetService<IBusinessLogic>();
-            var business = new BusinessLogic(new DownloaderService("http://partnerapi.funda.nl"), pageSize: 100);
-            business.OnProgressEventHandler += (int page, int totalPages) =>
-            {
-                Console.Title = $"{page}/{totalPages} Downloaded and Processed.";
-            };
-
-            var topMakelaarsAmsterdam = business.CountMakelaars();
-            print(topMakelaarsAmsterdam, "Amsterdam top makelaar");
-            var topMakelaarsAmsterdamTuin = business.CountMakelaars(withGarden: true);
-            print(topMakelaarsAmsterdam, "Amsterdam top makelaar (tuin)");
-
-
-            //string path = "/feeds/Aanbod.svc/json/ac1b0b1572524640a0ecc54de453ea9f/?type=koop&zo=/amsterdam";
-            //string info = "Top Makelaars Amsterdam";
-            //var topMakelaarsAmsterdam = CountMakelaars($"{path}/&page={{0}}&pagesize={{1}}", info);
-            //print(topMakelaarsAmsterdam, info);
-
-            //info = "Top Makelaars Amsterdam (Tuin)";
-            //var topMakelaarsAmsterdamTuin = CountMakelaars($"{path}/tuin/&page={{0}}&pagesize={{1}}", info);
-            //print(topMakelaarsAmsterdamTuin, info);
-        }
-
 
     }
 }
