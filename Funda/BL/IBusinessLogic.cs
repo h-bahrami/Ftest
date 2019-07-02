@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Funda.BL
 {
@@ -9,7 +6,7 @@ namespace Funda.BL
 
     public interface IBusinessLogic
     {
-        IEnumerable<string> GetTopMakelaars(string city = "amsterdam", bool withGarden = false, int pageSize = 100);
+        IEnumerable<string> GetTopMakelaars(string city, bool withGarden = false, int take = 10);
         public event OnProgress OnProgressEventHandler;
     }
 }

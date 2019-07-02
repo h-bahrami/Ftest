@@ -11,6 +11,7 @@ namespace Funda.BL
     public class BusinessLogic : IBusinessLogic
     {
         private readonly IDownloaderService downloader;
+        private int pageSize = 100;
 
         public event OnProgress OnProgressEventHandler;
 
@@ -31,18 +32,25 @@ namespace Funda.BL
             this.downloader = downloader;
         }
 
-        public IEnumerable<string> GetTopMakelaars(string city = "amsterdam", bool withGarden = false, int pageSize = 100)
+        /// <summary>
+        /// Downloads and processes the data to extract top makelaars
+        /// </summary>
+        /// <param name="city"></param>
+        /// <param name="withGarden"></param>
+        /// <param name="pageSize">this parameter can be assigned by </param>
+        /// <returns></returns>
+        public IEnumerable<string> GetTopMakelaars(string city, bool withGarden = false, int take = 10)
         {
             try
             {                
-                var downloadTask = this.downloader.DownloadData(GetPath(city, 1, pageSize, withGarden));
+                var downloadTask = this.downloader.DownloadData(GetPath(city, 1, this.pageSize, withGarden));
                 downloadTask.Wait();
                 var result = downloadTask.Result;
 
-                var pages = (int)result["Paging"]["AantalPaginas"].Value;
+                var totalPages = (int)result["Paging"]["AantalPaginas"].Value;
                 var dict = new Dictionary<string, int>();
 
-                for (var i = 2; i <= pages; i++)
+                for (var i = 2; i <= totalPages; i++)
                 {
                     foreach (var obj in result["Objects"])
                     {
@@ -54,15 +62,15 @@ namespace Funda.BL
                     }
                     
                     // for demo purpose, or even usefull for some cases ...
-                    OnProgressEventHandler?.Invoke(i-1, pages);
+                    OnProgressEventHandler?.Invoke(i-1, totalPages);
 
                     Thread.Sleep(100);
-                    downloadTask = this.downloader.DownloadData(GetPath(city, i, pageSize, withGarden));
+                    downloadTask = this.downloader.DownloadData(GetPath(city, i, this.pageSize, withGarden));
                     downloadTask.Wait();
                     result = downloadTask.Result;
                 }
 
-                var sorted = (from entry in dict orderby entry.Value descending select $"{entry.Key} ({entry.Value})").Take(10);
+                var sorted = (from entry in dict orderby entry.Value descending select $"{entry.Key} ({entry.Value})").Take(take);
                 return sorted;
             }
             catch (Exception ex)

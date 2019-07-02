@@ -10,16 +10,16 @@ namespace Funda
     { 
         static void Main(string[] args)
         {
-            // in real scenario the downloader service will be injected by DI
+            // in real-world scenario the downloader service will be injected by DI, also the BL also will be injected
             var business = new BusinessLogic(new JsonDownloaderService ("http://partnerapi.funda.nl"));
             business.OnProgressEventHandler += (int page, int totalPages) =>
             {
                 Console.Title = $"{page}/{totalPages} Downloaded and Processed.";
             };
 
-            var topMakelaarsAmsterdam = business.GetTopMakelaars();
+            var topMakelaarsAmsterdam = business.GetTopMakelaars(city: "amsterdam");
             print(topMakelaarsAmsterdam, "Amsterdam top makelaar");
-            var topMakelaarsAmsterdamTuin = business.GetTopMakelaars(withGarden: true);
+            var topMakelaarsAmsterdamTuin = business.GetTopMakelaars(city: "amsterdam", withGarden: true);
             print(topMakelaarsAmsterdam, "Amsterdam top makelaar (tuin)");
         }
 

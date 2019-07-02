@@ -14,9 +14,9 @@ namespace FundaUnittests
             var downloader = new JsonDownloaderService ("http://partnerapi.funda.nl");
             var bl = new BusinessLogic(downloader);
 
-            var result = bl.GetTopMakelaars();
+            var result = bl.GetTopMakelaars(city: "amsterdam", take: 15);
             Assert.NotNull(result);
-            Assert.Equal(10, result.ToList().Count);
+            Assert.Equal(15, result.ToList().Count);
         }
 
         [Fact]
@@ -25,9 +25,9 @@ namespace FundaUnittests
             var downloader = new JsonDownloaderService("http://partnerapi.funda.nl");
             var bl = new BusinessLogic(downloader);
 
-            var result = bl.GetTopMakelaars(withGarden:true);
+            var result = bl.GetTopMakelaars(city: "amsterdam", withGarden:true, take:12);
             Assert.NotNull(result);
-            Assert.Equal(10, result.ToList().Count);
+            Assert.Equal(12, result.ToList().Count);
         }
 
     }
